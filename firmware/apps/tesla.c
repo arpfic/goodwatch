@@ -1,38 +1,23 @@
 /*! \file tesla.c
   \brief OOK Application for TESLA Charging port Opener
 
-  Use the CC1101 datasheet, pp 35 :
-  calcs :
-
- \x86\xd9
- 134, 217
- 1000 0110 1101 1001
- 
- \xf7\x93
- 247, 147
- 1111 0111 1001 0011
- 
- xf7
- 247
- 
-  200us = 5kbaud
+  * Use the CC1101 datasheet, pp35
   
-AAAAAA8ACB32CCCCCB4D2D4AD34CAB4B1596659999969A5A95A69956962B2CCB33332D34B52B4D32AD28
-\xAA\xAA\xAA\x8A\xCB\x32\xCC\xCC\xCB\x4D\x2D\x4A\xD3\x4C\xAB\x4B\x15\x96\x65\x99\x99\x96\x9A\x5A\x69\x95\xA5\xA9\x5A\x69\x95\x69\x62\xB2\xCC\xB3\x33\x33\x2D\x34\xB5\x2B\x4D\x32\xAD\x28
-\xaa\xaa\xaa\x8a\xcb\x32\xcc\xcc\xcb\x4d\x2d\x4a\xd3\x4c\xab\x4b\x15\x96\x65\x99\x99\x96\x9a\x5a\x69\x95\xa5\xa9\x5a\x69\x95\x69\x62\xb2\xcc\xb3\x33\x33\x2d\x34\xb5\x2b\x4d\x32\xad\x28
+  * Calcs :
+  \x86\x93
+  134, 147
+  1000 0110 1001 0011
+  (((256+147)*2^6)/2^28)/26000000 = 2498
 
-101010101010101010101010100010101100101100110010110011001100110011001011010011010010110101001010110100110100110010101011010010110001010110010110011001011001100110011001100101101001101001011010100101011010011010011001010101101001011000101011001011001100101100110011001100110010110100110100101101010010101101001101001100101010110100101
+  We need 2500 baud = 400us
+  x86/x93 = 2498 baud
+  x86/x94 = 2504 baud
 
-
-
-\xAA\xAA\xAA\x8A\xCB\x32\xCC\xCC
-\xCB\x4D\x2D\x4A\xD3\x4C\xAB\x4B
-\x15\x96\x65\x99\x99\x96\x9A\x5A
-\x69\x95\xA5\xA9\x5A\x69\x95\x69
-\x62\xB2\xCC\xB3\x33\x33\x2D\x34
-\xB5\x2B\x4D\x32\xAD\x28
-
-= 46B
+  * Packet :
+  101010101010101010101010100010101100101100110010110011001100110011001011010011010010110101001010110100110100110010101011010010110001010110010110011001011001100110011001100101101001101001011010100101011010011010011001010101101001011000101011001011001100101100110011001100110010110100110100101101010010101101001101001100101010110100101
+  AAAAAA8ACB32CCCCCB4D2D4AD34CAB4B1596659999969A5A95A69956962B2CCB33332D34B52B4D32AD28
+  \xaa\xaa\xaa\x8a\xcb\x32\xcc\xcc\xcb\x4d\x2d\x4a\xd3\x4c\xab\x4b\x15\x96\x65\x99\x99\x96\x9a\x5a\x69\x95\xa5\xa9\x5a\x69\x95\x69\x62\xb2\xcc\xb3\x33\x33\x2d\x34\xb5\x2b\x4d\x32\xad\x28
+  LEN = 46B
 
 */
 
@@ -98,11 +83,10 @@ void tesla_packettx(){
   */
   if(lastch<='1' && lastch>='0'){
     transmit(lastch-'0');
-    transmit(lastch-'0');
+    transmit(lastch-'0'); // 2 more times to be sure
     transmit(lastch-'0');
   }
 }
-
 
 //! Enter the TESLA transmitter application.
 void tesla_init(){
@@ -113,7 +97,6 @@ void tesla_init(){
   }
 
   lcd_string("     TESLA");
-
   printf("%d button entries are available.\n", sizeof(button_array)/2);
 }
 
@@ -132,7 +115,7 @@ void tesla_draw(){
   switch(state){
   case 0:
   case 1:
-    //lcd_string("     OOK");
+    //lcd_string("     TESLA");
     break;
   case 19: //RX IDLE between transmit packets.
     lcd_string("TRANSMIT");
@@ -159,9 +142,9 @@ int tesla_keypress(char ch){
     radio_on();
     radio_writesettings(tesla_settings);
     setrate(ch-'0'); //First two bytes are the packet rate.
-    radio_writepower(0x25); // 0xB0
+    radio_writepower(0x25); // or 0xB0 ?
     //Set a frequency manually rather than using the codeplug.
-    radio_setfreq(433920000); // 315 in US
+    radio_setfreq(433920000); // 315000000 in US
 
     //This handler will be called back as the packet finished transmission.
     tesla_packettx();
