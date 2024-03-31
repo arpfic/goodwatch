@@ -11,21 +11,22 @@ HEBREW_APP = 1
 SHABBAT_APP = 0
 RNG_APP = 0
 TUNER_APP = 0
-MORSE_APP = 0
+MORSE_APP = 1
 BEACON_APP = 0
-OOK_APP = 1
+OOK_APP = 0
+TESLA_APP = 1
 SHADERS_APP = 0
 COUNTER_APP = 1
 DMESG_APP = 1
 PAGER_APP = 0
-JUKEBOX_APP = 1
+JUKEBOX_APP = 0
 
 #Don't forget to set your timezone for Beats in config.h.
 BEATS_APP = 0
 
 
 #set default flashing serial port, dont override if passed in as an argument
-PORT ?= /dev/ttyUSB0
+PORT ?= /dev/ttyACM0
 #Mandatory applets.
 APPS_OBJ += apps/clock.o apps/settime.o apps/submenu.o 
 
@@ -93,6 +94,10 @@ endif
 ifeq ($(OOK_APP),1)
 APPS_OBJ += apps/ook.o
 APPS_DEFINES += OOK_APP 
+endif
+ifeq ($(TESLA_APP),1)
+APPS_OBJ += apps/tesla.o
+APPS_DEFINES += TESLA_APP 
 endif
 ifeq ($(SHADERS_APP),1)
 APPS_OBJ += apps/shaders.o

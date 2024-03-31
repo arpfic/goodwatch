@@ -139,12 +139,22 @@ const struct app subapps[]={
    .packetrx=beacon_packetrx, .keypress=beacon_keypress
   },
 #endif
+
 #ifdef OOK_APP
   //OOK
   {.name="OOK",
    .init=ook_init, .draw=ook_draw, .exit=ook_exit,
    .packetrx=ook_packetrx, .packettx=ook_packettx,
    .keypress=ook_keypress
+  },
+#endif
+
+#ifdef TESLA_APP
+  //TESLA
+  {.name="TESLA",
+   .init=tesla_init, .draw=tesla_draw, .exit=tesla_exit,
+   .packetrx=tesla_packetrx, .packettx=tesla_packettx,
+   .keypress=tesla_keypress
   },
 #endif
 
